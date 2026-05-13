@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>صيانة مركبتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: #0d0f14;
+    background-image: radial-gradient(ellipse at 20% 0%, #1a1f2e 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, #1a0f0f 0%, transparent 60%);
+    font-family: 'Cairo', sans-serif;
+    color: #fff;
+    direction: rtl;
+  }
+  /* Header */
+  .header { padding: 28px 24px 0; text-align: center; }
+  .header-inner { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .header-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .header h1 { font-size: 22px; font-weight: 800; }
+  .header-sub { color: #f59e0b; font-size: 13px; margin-top: 4px; }
+
+  /* Tabs */
+  .tabs { display: flex; padding: 20px 12px 0; gap: 5px; overflow-x: auto; }
+  .tab-btn {
+    flex: 1; min-width: 58px; padding: 9px 2px; border: none; border-radius: 10px;
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 11px; font-weight: 600;
+    transition: all 0.2s; background: rgba(255,255,255,0.06); color: #6b7280;
+  }
+  .tab-btn.active { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+  .tab-icon { font-size: 17px; margin-bottom: 2px; display: block; }
+
+  /* Content */
+  .content { padding: 24px 20px 100px; max-width: 520px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  h2 { font-size: 18px; font-weight: 700; margin-bottom: 24px; color: #f59e0b; }
+  h3 { font-size: 15px; font-weight: 700; color: #9ca3af; }
+
+  /* Form */
+  .field { margin-bottom: 20px; }
+  label { color: #9ca3af; font-size: 13px; margin-bottom: 6px; display: block; font-weight: 500; }
+  input, select, textarea {
+    width: 100%; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+    padding: 12px 16px; color: #fff; font-size: 15px; outline: none;
+    font-family: 'Cairo', sans-serif; transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: rgba(245,158,11,0.5); }
+  select option { background: #1a1f2e; color: #fff; }
+  textarea { height: 80px; resize: vertical; }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #f59e0b, #ef4444); border: none; border-radius: 12px;
+    padding: 14px 32px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; width: 100%; transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+
+  /* Upload area */
+  .upload-area {
+    border: 2px dashed rgba(245,158,11,0.4); border-radius: 12px; padding: 24px;
+    text-align: center; cursor: pointer; background: rgba(245,158,11,0.04); transition: all 0.2s;
+  }
+  .upload-area:hover { background: rgba(245,158,11,0.08); }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-title { color: #f59e0b; font-size: 14px; font-weight: 600; }
+  .upload-sub { color: #6b7280; font-size: 12px; margin-top: 4px; }
+  .doc-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .doc-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px 14px;
+  }
+  .doc-info { display: flex; align-items: center; gap: 10px; }
+  .doc-name { font-size: 13px; font-weight: 600; }
+  .doc-size { font-size: 11px; color: #6b7280; }
+  .btn-remove { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 20px; }
+
+  /* Cards */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    background: rgba(255,255,255,0.04); border-radius: 16px;
+    padding: 18px 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .stat-icon {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .stat-label { color: #9ca3af; font-size: 11px; margin-bottom: 3px; }
+  .stat-value { color: #fff; font-size: 17px; font-weight: 700; }
+
+  /* Records */
+  .record-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 18px; margin-bottom: 12px;
+  }
+  .record-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .record-type { font-weight: 700; font-size: 15px; }
+  .record-date { font-size: 12px; color: #6b7280; margin-top: 3px; }
+  .record-actions { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    background: rgba(245,158,11,0.15); color: #f59e0b;
+    padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  }
+  .badge-green { background: rgba(16,185,129,0.15); color: #10b981; }
+  .record-notes {
+    font-size: 13px; color: #9ca3af; margin-bottom: 8px;
+    padding: 8px 12px; background: rgba(255,255,255,0.04); border-radius: 8px;
+  }
+  .docs-section { margin-top: 8px; }
+  .docs-label { font-size: 11px; color: #6b7280; margin-bottom: 6px; }
+  .docs-links { display: flex; flex-wrap: wrap; gap: 6px; }
+  .doc-link {
+    display: flex; align-items: center; gap: 6px; background: rgba(99,102,241,0.15);
+    color: #818cf8; padding: 5px 10px; border-radius: 8px; font-size: 12px;
+    text-decoration: none; font-weight: 500;
+  }
+
+  /* Fuel list */
+  .fuel-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 16px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .fuel-left { display: flex; gap: 14px; align-items: center; }
+  .fuel-icon-box {
+    width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12);
+    display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+  }
+  .fuel-liters { font-weight: 700; font-size: 16px; color: #10b981; }
+  .fuel-date { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Tracking */
+  .mileage-diff {
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center;
+  }
+  .mileage-diff-label { color: #9ca3af; font-size: 12px; margin-bottom: 4px; }
+  .mileage-diff-value { color: #f59e0b; font-size: 24px; font-weight: 800; }
+  .tracking-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
+  }
+
+  /* Filter chips */
+  .filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; }
+  .chip {
+    white-space: nowrap; padding: 7px 14px; border-radius: 20px; border: none;
+    font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;
+    background: rgba(255,255,255,0.07); color: #9ca3af; transition: all 0.2s;
+  }
+  .chip.active { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+
+  /* Chart bars */
+  .chart-section { background: rgba(255,255,255,0.04); border-radius: 16px; padding: 20px; }
+  .chart-row { margin-bottom: 14px; }
+  .chart-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .chart-type { font-size: 13px; color: #e5e7eb; }
+  .chart-cost { font-size: 13px; font-weight: 700; color: #f59e0b; }
+  .chart-track { height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; }
+  .chart-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 99px; transition: width 0.6s; }
+
+  /* Toast */
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: #10b981; color: #fff; padding: 10px 24px; border-radius: 20px;
+    font-size: 14px; font-weight: 600; z-index: 999; display: none;
+    box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+  }
+  .toast.show { display: block; }
+
+  /* Empty state */
+  .empty { text-align: center; color: #4b5563; padding: 40px 0; }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-icon">🚗</div>
+    <h1>صيانة مركبتي</h1>
+  </div>
+  <div class="header-sub" id="vehicleSubtitle"></div>
+</div>
+
+<div class="tabs" id="tabsBar"></div>
+
+<div class="toast" id="toast">✓ تم الحفظ</div>
+
+<div class="content">
+
+  <!-- TAB 0: المركبة -->
+  <div class="tab-panel active" id="panel-0">
+    <h2>بيانات المركبة</h2>
+    <div class="field"><label>نوع المركبة</label><input type="text" id="v-type" placeholder="مثال: تويوتا"/></div>
+    <div class="field"><label>موديل المركبة</label><input type="text" id="v-model" placeholder="مثال: كامري"/></div>
+    <div class="field"><label>سنة الصنع</label><input type="number" id="v-year" placeholder="مثال: 2021"/></div>
+    <div class="field"><label>المسافة المقطوعة الحالية (كم)</label><input type="number" id="v-mileage" placeholder="مثال: 45000"/></div>
+    <button class="btn-primary" onclick="saveVehicle()">💾 حفظ بيانات المركبة</button>
+  </div>
+
+  <!-- TAB 1: الصيانة -->
+  <div class="tab-panel" id="panel-1">
+    <h2>تسجيل صيانة جديدة</h2>
+    <div class="field">
+      <label>نوع الصيانة</label>
+      <select id="m-type" onchange="toggleCustomType()">
+        <option value="">— اختر نوع الصيانة —</option>
+        <option>تغيير زيت المحرك</option>
+        <option>فحص الفرامل</option>
+        <option>تغيير الإطارات</option>
+        <option>فحص البطارية</option>
+        <option>فحص نظام التبريد</option>
+        <option>تغيير فلتر الهواء</option>
+        <option>فحص الإضاءة</option>
+        <option>صيانة دورية شاملة</option>
+        <option>أخرى</option>
+      </select>
+    </div>
+    <div class="field" id="custom-type-field" style="display:none">
+      <label>اكتب نوع الصيانة</label>
+      <input type="text" id="m-custom" placeholder="نوع الصيانة..."/>
+    </div>
+    <div class="field"><label>مبلغ الصيانة (ريال)</label><input type="number" id="m-amount" placeholder="مثال: 350"/></div>
+    <div class="field"><label>ملاحظات (اختياري)</label><textarea id="m-notes" placeholder="أي ملاحظات..."></textarea></div>
+    <div class="field">
+      <label>📎 المستندات والفواتير</label>
+      <div class="upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">اضغط لرفع ملفات</div>
+        <div class="upload-sub">PDF، صور، وثائق</div>
+      </div>
+      <input type="file" id="file-input" multiple accept=".pdf,image/*,.doc,.docx" style="display:none" onchange="handleFiles(event)"/>
+      <div class="doc-list" id="doc-list"></div>
+    </div>
+    <button class="btn-primary" onclick="saveMaintenance()">💾 حفظ سجل الصيانة</button>
+  </div>
+
+  <!-- TAB 2: الوقود -->
+  <div class="tab-panel" id="panel-2">
+    <h2>تسجيل تعبئة وقود</h2>
+    <div class="field"><label>كمية الوقود (لتر)</label><input type="number" id="f-liters" placeholder="مثال: 45"/></div>
+    <div class="field"><label>المبلغ المدفوع (ريال)</label><input type="number" id="f-amount" placeholder="مثال: 62"/></div>
+    <div class="field"><label>تاريخ التعبئة</label><input type="date" id="f-date"/></div>
+    <button class="btn-primary" onclick="saveFuel()">💾 حفظ التعبئة</button>
+    <div style="margin-top:32px" id="fuel-list-section"></div>
+  </div>
+
+  <!-- TAB 3: التتبع -->
+  <div class="tab-panel" id="panel-3">
+    <h2>تتبع المسافة</h2>
+    <div class="field"><label>المسافة المقطوعة (كم)</label><input type="number" id="t-mileage" placeholder="مثال: 48500" oninput="updateMileageDiff()"/></div>
+    <div class="field"><label>التاريخ</label><input type="date" id="t-date"/></div>
+    <div class="mileage-diff" id="mileage-diff" style="display:none">
+      <div class="mileage-diff-label">المسافة منذ آخر تسجيل</div>
+      <div class="mileage-diff-value" id="mileage-diff-value"></div>
+    </div>
+    <button class="btn-primary" onclick="saveTracking()">💾 حفظ</button>
+    <div style="margin-top:28px" id="tracking-list-section"></div>
+  </div>
+
+  <!-- TAB 4: إحصائيات -->
+  <div class="tab-panel" id="panel-4">
+    <h2>الإحصائيات</h2>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div id="chart-section"></div>
+  </div>
+
+  <!-- TAB 5: السجل -->
+  <div class="tab-panel" id="panel-5">
+    <h2>سجل الصيانات</h2>
+    <div class="filter-bar" id="filter-bar"></div>
+    <div id="records-list"></div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'car_maintenance_v3';
+const TABS = [
+  { label: 'المركبة', icon: '🚗' },
+  { label: 'الصيانة', icon: '🔧' },
+  { label: 'الوقود', icon: '⛽' },
+  { label: 'التتبع', icon: '📍' },
+  { label: 'إحصائيات', icon: '📊' },
+  { label: 'السجل', icon: '🗂️' },
+];
+
+let activeTab = 0;
+let pendingDocs = [];
+let activeFilter = 'الكل';
+
+// ── Data ──
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { vehicle: {}, maintenanceRecords: [], trackingRecords: [], fuelRecords: [] };
+    const p = JSON.parse(raw);
+    return {
+      vehicle: p.vehicle || {},
+      maintenanceRecords: Array.isArray(p.maintenanceRecords) ? p.maintenanceRecords : [],
+      trackingRecords: Array.isArray(p.trackingRecords) ? p.trackingRecords : [],
+      fuelRecords: Array.isArray(p.fuelRecords) ? p.fuelRecords : [],
+    };
+  } catch { return { vehicle: {}, maintenanceRecords: [], trackingRecords: [], fuelRecords: [] }; }
+}
+function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {} }
+let data = loadData();
+
+// ── Helpers ──
+function formatDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }); }
+  catch { return d; }
+}
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function fmt(n) { return (parseFloat(n) || 0).toLocaleString('ar'); }
+
+// ── Tabs ──
+function buildTabs() {
+  const bar = document.getElementById('tabsBar');
+  bar.innerHTML = TABS.map((t, i) => `
+    <button class="tab-btn ${i === activeTab ? 'active' : ''}" onclick="switchTab(${i})">
+      <span class="tab-icon">${t.icon}</span>${t.label}
+    </button>`).join('');
+}
+function switchTab(i) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + i).classList.add('active');
+  activeTab = i;
+  buildTabs();
+  if (i === 2) renderFuelList();
+  if (i === 3) renderTrackingList();
+  if (i === 4) renderStats();
+  if (i === 5) renderRecords();
+}
+
+// ── Vehicle ──
+function loadVehicleFields() {
+  const v = data.vehicle;
+  document.getElementById('v-type').value = v.type || '';
+  document.getElementById('v-model').value = v.model || '';
+  document.getElementById('v-year').value = v.year || '';
+  document.getElementById('v-mileage').value = v.currentMileage || '';
+  updateSubtitle();
+}
+function saveVehicle() {
+  data.vehicle = {
+    type: document.getElementById('v-type').value,
+    model: document.getElementById('v-model').value,
+    year: document.getElementById('v-year').value,
+    currentMileage: document.getElementById('v-mileage').value,
+  };
+  saveData(data);
+  updateSubtitle();
+  showToast();
+}
+function updateSubtitle() {
+  const v = data.vehicle;
+  const el = document.getElementById('vehicleSubtitle');
+  el.textContent = (v.type && v.model) ? `${v.type} ${v.model} — ${v.year || ''}` : '';
+}
+
+// ── Maintenance ──
+function toggleCustomType() {
+  const sel = document.getElementById('m-type').value;
+  document.getElementById('custom-type-field').style.display = sel === 'أخرى' ? 'block' : 'none';
+}
+function handleFiles(e) {
+  const files = Array.from(e.target.files);
+  const promises = files.map(file => new Promise(res => {
+    const r = new FileReader();
+    r.onload = ev => res({ name: file.name, size: file.size, data: ev.target.result, type: file.type });
+    r.readAsDataURL(file);
+  }));
+  Promise.all(promises).then(docs => {
+    pendingDocs = [...pendingDocs, ...docs];
+    renderDocList();
+  });
+}
+function renderDocList() {
+  const el = document.getElementById('doc-list');
+  if (!pendingDocs.length) { el.innerHTML = ''; return; }
+  el.innerHTML = pendingDocs.map((doc, i) => `
+    <div class="doc-item">
+      <div class="doc-info">
+        <span style="font-size:20px">${doc.type?.includes('image') ? '🖼️' : '📄'}</span>
+        <div>
+          <div class="doc-name">${doc.name}</div>
+          <div class="doc-size">${(doc.size / 1024).toFixed(1)} KB</div>
+        </div>
+      </div>
+      <button class="btn-remove" onclick="removeDoc(${i})">×</button>
+    </div>`).join('');
+}
+function removeDoc(i) { pendingDocs.splice(i, 1); renderDocList(); }
+function saveMaintenance() {
+  const typeEl = document.getElementById('m-type').value;
+  const typeFinal = typeEl === 'أخرى' ? document.getElementById('m-custom').value : typeEl;
+  if (!typeFinal) return;
+  const record = {
+    id: Date.now(), type: typeFinal,
+    amount: document.getElementById('m-amount').value,
+    notes: document.getElementById('m-notes').value,
+    documents: [...pendingDocs],
+    date: new Date().toISOString(),
+  };
+  data.maintenanceRecords.unshift(record);
+  saveData(data);
+  // reset
+  document.getElementById('m-type').value = '';
+  document.getElementById('m-custom').value = '';
+  document.getElementById('m-amount').value = '';
+  document.getElementById('m-notes').value = '';
+  document.getElementById('custom-type-field').style.display = 'none';
+  pendingDocs = [];
+  renderDocList();
+  showToast();
+}
+
+// ── Fuel ──
+function saveFuel() {
+  const liters = document.getElementById('f-liters').value;
+  const date = document.getElementById('f-date').value;
+  if (!liters || !date) return;
+  data.fuelRecords.unshift({ id: Date.now(), liters, amount: document.getElementById('f-amount').value, date });
+  saveData(data);
+  document.getElementById('f-liters').value = '';
+  document.getElementById('f-amount').value = '';
+  document.getElementById('f-date').value = '';
+  showToast();
+  renderFuelList();
+}
+function removeFuel(id) {
+  data.fuelRecords = data.fuelRecords.filter(r => r.id !== id);
+  saveData(data);
+  renderFuelList();
+}
+function renderFuelList() {
+  const el = document.getElementById('fuel-list-section');
+  if (!data.fuelRecords.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">⛽</div>لا توجد تعبئات مسجلة بعد</div>`;
+    return;
+  }
+  const totalLiters = data.fuelRecords.reduce((s, r) => s + (parseFloat(r.liters) || 0), 0);
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3>سجل التعبئات</h3>
+      <span class="badge badge-green">${fmt(totalLiters)} لتر إجمالاً</span>
+    </div>
+    ${data.fuelRecords.map(r => `
+      <div class="fuel-card">
+        <div class="fuel-left">
+          <div class="fuel-icon-box">⛽</div>
+          <div>
+            <div class="fuel-liters">${fmt(r.liters)} لتر</div>
+            <div class="fuel-date">${formatDate(r.date)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${r.amount ? `<span class="badge">${fmt(r.amount)} ر</span>` : ''}
+          <button class="btn-remove" onclick="removeFuel(${r.id})">🗑️</button>
+        </div>
+      </div>`).join('')}`;
+}
+
+// ── Tracking ──
+function updateMileageDiff() {
+  const input = parseFloat(document.getElementById('t-mileage').value);
+  const last = parseFloat(data.trackingRecords[0]?.mileage || data.vehicle?.currentMileage || 0);
+  const diff = document.getElementById('mileage-diff');
+  if (input && last) {
+    const delta = Math.max(0, input - last);
+    document.getElementById('mileage-diff-value').textContent = delta.toLocaleString('ar') + ' كم';
+    diff.style.display = 'block';
+  } else {
+    diff.style.display = 'none';
+  }
+}
+function saveTracking() {
+  const mileage = document.getElementById('t-mileage').value;
+  const date = document.getElementById('t-date').value;
+  if (!mileage || !date) return;
+  data.trackingRecords.unshift({ id: Date.now(), mileage, date });
+  saveData(data);
+  document.getElementById('t-mileage').value = '';
+  document.getElementById('t-date').value = '';
+  document.getElementById('mileage-diff').style.display = 'none';
+  showToast();
+  renderTrackingList();
+}
+function removeTracking(id) {
+  data.trackingRecords = data.trackingRecords.filter(r => r.id !== id);
+  saveData(data);
+  renderTrackingList();
+}
+function renderTrackingList() {
+  const el = document.getElementById('tracking-list-section');
+  if (!data.trackingRecords.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <h3 style="margin-bottom:16px">سجل المسافات</h3>
+    ${data.trackingRecords.map(r => `
+      <div class="tracking-row">
+        <div>
+          <div style="font-weight:700;color:#f59e0b">${parseInt(r.mileage).toLocaleString('ar')} كم</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">${formatDate(r.date)}</div>
+        </div>
+        <button class="btn-remove" onclick="removeTracking(${r.id})">🗑️</button>
+      </div>`).join('')}`;
+}
+
+// ── Stats ──
+function renderStats() {
+  const totalMaint = data.maintenanceRecords.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+  const totalFuelCost = data.fuelRecords.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+  const totalFuelL = data.fuelRecords.reduce((s, r) => s + (parseFloat(r.liters) || 0), 0);
+  const lastMileage = data.trackingRecords[0]?.mileage || data.vehicle?.currentMileage || 0;
+  const totalDocs = data.maintenanceRecords.reduce((s, r) => s + (r.documents?.length || 0), 0);
+
+  const cards = [
+    { icon: '🔧', label: 'عدد الصيانات', value: data.maintenanceRecords.length, accent: '#ef4444' },
+    { icon: '💰', label: 'تكاليف الصيانة', value: fmt(totalMaint) + ' ر', accent: '#f59e0b' },
+    { icon: '⛽', label: 'إجمالي التعبئات', value: fmt(totalFuelL) + ' ل', accent: '#10b981' },
+    { icon: '💸', label: 'مصاريف الوقود', value: fmt(totalFuelCost) + ' ر', accent: '#06b6d4' },
+    { icon: '📍', label: 'آخر مسافة مسجلة', value: lastMileage ? parseInt(lastMileage).toLocaleString('ar') + ' كم' : '—', accent: '#8b5cf6' },
+    { icon: '📄', label: 'المستندات', value: totalDocs, accent: '#6366f1' },
+  ];
+
+  document.getElementById('stats-grid').innerHTML = cards.map(c => `
+    <div class="stat-card" style="border:1px solid ${c.accent}33">
+      <div class="stat-icon" style="background:${c.accent}22">${c.icon}</div>
+      <div>
+        <div class="stat-label">${c.label}</div>
+        <div class="stat-value">${c.value}</div>
+      </div>
+    </div>`).join('');
+
+  const cs = document.getElementById('chart-section');
+  if (!data.maintenanceRecords.length) {
+    cs.innerHTML = `<div class="empty"><div class="empty-icon">📊</div>لا توجد بيانات بعد</div>`;
+    return;
+  }
+  const byType = {};
+  data.maintenanceRecords.forEach(r => { byType[r.type] = (byType[r.type] || 0) + (parseFloat(r.amount) || 0); });
+  const sorted = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+  cs.innerHTML = `
+    <div class="chart-section">
+      <h3 style="margin-bottom:16px">تكاليف الصيانة حسب النوع</h3>
+      ${sorted.map(([type, cost]) => `
+        <div class="chart-row">
+          <div class="chart-labels">
+            <span class="chart-type">${type}</span>
+            <span class="chart-cost">${fmt(cost)} ر</span>
+          </div>
+          <div class="chart-track">
+            <div class="chart-fill" style="width:${totalMaint > 0 ? (cost / totalMaint * 100) : 0}%"></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Records ──
+function renderRecords() {
+  const uniqueTypes = ['الكل', ...new Set(data.maintenanceRecords.map(r => r.type))];
+  const filterBar = document.getElementById('filter-bar');
+  filterBar.innerHTML = uniqueTypes.length > 1
+    ? uniqueTypes.map(t => `<button class="chip ${t === activeFilter ? 'active' : ''}" onclick="setFilter('${t}')">${t}</button>`).join('')
+    : '';
+
+  const filtered = activeFilter === 'الكل' ? data.maintenanceRecords : data.maintenanceRecords.filter(r => r.type === activeFilter);
+  const el = document.getElementById('records-list');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🗂️</div>لا توجد سجلات</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(r => `
+    <div class="record-card">
+      <div class="record-header">
+        <div>
+          <div class="record-type">${r.type}</div>
+          <div class="record-date">${formatDate(r.date)}</div>
+        </div>
+        <div class="record-actions">
+          ${r.amount ? `<span class="badge">${fmt(r.amount)} ر</span>` : ''}
+          <button class="btn-remove" onclick="removeRecord(${r.id})">🗑️</button>
+        </div>
+      </div>
+      ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ''}
+      ${r.documents?.length ? `
+        <div class="docs-section">
+          <div class="docs-label">المستندات المرفقة:</div>
+          <div class="docs-links">
+            ${r.documents.map(doc => `
+              <a href="${doc.data}" download="${doc.name}" class="doc-link">
+                ${doc.type?.includes('image') ? '🖼️' : '📄'} ${doc.name}
+              </a>`).join('')}
+          </div>
+        </div>` : ''}
+    </div>`).join('');
+}
+function setFilter(type) {
+  activeFilter = type;
+  renderRecords();
+}
+function removeRecord(id) {
+  data.maintenanceRecords = data.maintenanceRecords.filter(r => r.id !== id);
+  saveData(data);
+  renderRecords();
+}
+
+// ── Init ──
+buildTabs();
+loadVehicleFields();
+</script>
+</body>
+</html>
